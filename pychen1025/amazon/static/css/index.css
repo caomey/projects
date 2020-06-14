@@ -1,0 +1,35 @@
+#nav_all{
+    background-color: #32323c;
+}
+#readInfo{
+    background-color: rgb(30,30,40);
+}
+label{
+    color: white;
+} 
+thead{
+    background-color: #32323c;
+}
+.table-dark th{
+   color: white;
+}
+caption{
+  background-color: #3c3c46;
+    color: #4cae4c;
+}
+th{
+    background-color: #464650;
+    color: white;
+   border: 1px solid transparent !important;  /*去除bootstrap table 的边界线*/
+}
+tr{
+    background-color: #3e4453;
+    color: white;
+    border-radius: 10px;
+}
+td{
+    border: 1px solid transparent !important; /*去除bootstrap table 的边界线*/
+}
+.table{
+    margin-bottom:0px!important;  /*默认带20px的留白覆盖掉*/
+}

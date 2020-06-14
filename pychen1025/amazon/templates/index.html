@@ -1,0 +1,470 @@
+{% extends "base.html" %}
+{% block 主体 %}
+<!-- 产品类目 -->
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+<style>
+    .img-wrapper {
+        position: relative;
+    }
+
+    .small-img {
+        width: 250px;
+        height: 250px;
+        cursor: pointer; /*鼠标箭头变手的形状*/
+    }
+
+    .big-img {
+        width: 500px;
+        height: 500px;
+        display: none;
+        position: absolute;
+        left: 250px;
+        top: -250px;
+    }
+    .table>tbody>tr:hover{
+            background: rgb(40,40,50);
+        }
+</style>
+    <script>
+        $('#amazonData').addClass('active')/*选中导航栏加深颜色*/
+        $(function () {
+            $(".small-img").hover(function () {
+                var imgSrc = $(this).attr("data-big");
+                $(".big-img").attr("src", imgSrc);
+                $(this).siblings(".big-img").show();
+            }, function () {
+                $(".big-img").hide()
+            })
+        })
+       $("#fixHead").scroll(function(){
+		if($(this).attr("style").indexOf("overflow")>-1){
+			var scrollTop = this.scrollTop;
+			$(this).find("thead").attr("style","transform: translateY(" + scrollTop + "px);")
+		};
+	});
+    $(function () {
+        var b = $('#readInfo div').children('button').length
+        if(b == 2){
+            $('#notRead').show()
+        }
+    })
+    </script>
+<div id='nav_all' class="container-fluid" style="padding-top:80px;padding-bottom: 10px">
+    <form class="form-inline" method="post" action="">{% csrf_token %}
+<!--        &lt;!&ndash;        类目&ndash;&gt;-->
+<!--        <div class="row" style="margin-bottom:10px;">-->
+<!--            <div class="col-md-5">-->
+<!--                <div class="form-group">-->
+<!--                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>-->
+<!--                    <label>Category：</label>-->
+<!--                    <select name="category" class="form-control">-->
+<!--                        <option>全部</option>-->
+<!--                        <option>Arts, Crafts & Sewing(艺术,工艺和缝纫)</option>-->
+<!--                        <option>Tools & Home Improvement(工具&家居)</option>-->
+<!--                        <option>Home & Kitchen(家庭和厨房)</option>-->
+<!--                        <option>Kitchen & Dining(厨房和餐厅)</option>-->
+<!--                        <option>Patio, Lawn & Garden(庭院、草坪和花园)</option>-->
+<!--                        <option>Office Products(办公产品)</option>-->
+<!--                        <option>Pet Supplies(宠物用品)</option>-->
+<!--                    </select>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="col-md-4">-->
+<!--                <div class="form-group">-->
+<!--                    <i></i>-->
+<!--                    <span class="glyphicon glyphicon-plane" aria-hidden="true"></span>-->
+<!--                    <label>Delivery</label>-->
+<!--                    <select name="delivery" class="form-control">-->
+<!--                        <option>全部</option>-->
+<!--                        <option>FBA</option>-->
+<!--                        <option>FBM</option>-->
+<!--                        <option>Amazon</option>-->
+<!--                        <option>Other</option>-->
+<!--                    </select>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        &lt;!&ndash;价格和排名&ndash;&gt;-->
+<!--        <div class="row" style="margin-bottom:10px;">-->
+<!--            <div class="col-md-5">-->
+<!--                <div class="form-group">-->
+<!--                    <span class="glyphicon glyphicon-usd" aria-hidden="true"></span>-->
+<!--                    <label>Price：</label>-->
+<!--                    <input name="最低价格" class="form-control" type="number" style="width:100px;">-->
+<!--                    <span>-</span>-->
+<!--                    <input name="最高价格" class="form-control" type="number" style="width:100px;">-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="col-md-4">-->
+<!--                <div class="form-group">-->
+<!--                    <span class="glyphicon glyphicon-sort-by-order" aria-hidden="true"></span>-->
+<!--                    <label>Rank：</label>-->
+<!--                    <input name="最低排名" class="form-control" type="number" style="width:100px;">-->
+<!--                    <span>-</span>-->
+<!--                    <input name="最高排名" class="form-control" type="number" style="width:100px;">-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+        <div id='nav_date' class="row" style="margin-bottom:10px;">
+            <!-- 数据日期 -->
+            <div class="col-md-2">
+                <div class="form-group">
+                    <span class="icon icon-time"></span>
+                    <label style="margin-left: 10px;">Date：</label>
+                    <select name="date" class="form-control">
+                        {% for date in 数据获取时间 %}
+                        <option {% if date == 选择时间 %}selected="selected" {% endif %}>{{date}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <span class="icon icon-star"></span>
+                    <label style="margin-left: 10px">Collection：</label>
+                    <select name="collection" class="form-control">
+                        <option id="all_asin" {% if collection == 0 %}selected="selected" {% endif %}>全部</option>
+                        <option id='collected' {% if collection == 1 %}selected="selected" {% endif %}>已收藏的产品</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success">提交</button>
+        </div>
+    </form>
+    <div class="form-inline">
+        <span class="icon icon-airplane"></span>
+        <label>  Delivery：</label>
+        <select id='delivery' name="delivery" class="form-control">
+            <option>全部</option>
+            <option>FBA</option>
+            <option>FBM</option>
+            <option>Other</option>
+        </select>
+    </div>
+</div>
+<!-- Table -->
+{% if collection == 0 %}
+<!--已收藏的listing没有这一栏-->
+<div id="readInfo" class="container-fluid">
+    <div class="form-inline">
+        {% for listing in 跟卖listings %}
+        {% if listing.readinfo != '0' %}
+        <button class="btn btn-primary read" type="button">
+            已看到第 <span class="badge">{{listing.readinfo}}</span> 条
+        </button>
+        {% endif %}
+        {% endfor %}
+        <button id='notRead' class="btn btn-danger read" type="button" style="display: none">
+            还未开始查看
+        </button>
+        <input name='1688' type="text" class="form-control" placeholder="输入看到第几条" style="width:200px">
+        <button id='readRows' class="btn btn-default" name="{{选择时间}}">Submit</button>
+    </div>
+</div>
+{% endif %}
+<table class="table table-responsive" data-height="500">
+    <caption>共查询出<span id='count'>{{计数}}</span>条商品结果</caption>
+    <thead>
+        <tr class="table-dark">
+            <th>#</th>
+            <th>image</th>
+            <th>Brand</th>
+            <th>Rank</th>
+            <th>Price</th>
+            <th>Info</th>
+            <th>Review</th>
+            <th>Sellers</th>
+            <th>Build time</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for listing in 跟卖listings %}
+        <tr>
+            <!--                    序号-->
+            <th scope="row" style="width:30px;">{{forloop.counter}}</th>
+            <!--                    图片-->
+            <td style="width:250px; vertical-align:middle;">
+                <div class="img-wrapper">
+                    <img class="small-img" src="{{listing.img}}" lazy="loaded" data-big="{{listing.img}}">
+                    <img class="big-img" style="display: none;">
+                </div>
+                <a href="https://kj.1688.com/pdt_tongkuan.html?&imgUrl={{listing.img}}" target="_blank"
+                    style="margin-top: 5px; float: left;">
+                    <button class="btn btn-danger" type="button">
+                        <span>货源查询</span>
+                    </button></a>
+                <button class="btn btn-success post"
+                    style="margin-top: 5px; float: left; margin-left: 16px; width: 80px;{% if collection == 1 %}display:none{% endif %}"
+                    name={{listing.asin}}>收藏
+                </button>
+                <button class="btn btn-warning post"
+                    style="margin-top: 5px; float: left; margin-left: 16px; width: 80px;{% if collection == 0 %}display:none{% endif %}"
+                    name={{listing.asin}}>取消收藏
+                </button>
+            </td>
+            <!--                    brand-->
+            <td style="width:250px; ">
+                <div class="form-inline" style="margin-bottom:20px; ">
+                    <span class="label label-success">Brand:</span>
+                    <span>{{listing.brand}}</span>
+                </div>
+                <div class="form-inline" style="margin-bottom:20px;">
+                    <span class="label label-warning">Store name:</span>
+                    <span>{{listing.merchant}}</span>
+                </div>
+                <div class="form-inline" style="margin-bottom:20px;">
+                    <a href="https://www.trademarkia.com/trademarks-search.aspx?tn={{listing.brand}}" target="_blank"
+                       style="margin-top: 10px;">
+                        <button class="btn btn-primary" type="button">
+                            <span>商标查询</span>
+                        </button>
+                    </a>
+                </div>
+                <div class="form-inline" style="margin-bottom:20px;">
+                    <button class="btn btn-primary monitor" type="button" name="{{listing.asin}}">
+                        <span>添加监测</span>
+                    </button>
+                </div>
+                <div class="form-inline" style="margin-bottom:20px;">
+                    <button class="btn btn-danger cancel_monitor" type="button" name="{{listing.asin}}">
+                        <span>取消监测</span>
+                    </button>
+                </div>
+            </td>
+            <!--                    rank-->
+            <td style="width:100px; vertical-align:middle; vertical-align:middle;">
+                <div class="form-inline" style="margin-bottom:20px;">
+                    <span>#</span>
+                    <span>{{listing.rank}}</span>
+                </div>
+            </td>
+            <!--                    price-->
+            <td style="width:100px; vertical-align:middle;">
+                <div class="form-inline" style="margin-bottom:20px;">
+                    <span>$</span>
+                    <span>{{listing.price}}</span>
+                </div>
+            </td>
+            <!--                    info所有列中就这一列没有固定长度-->
+            <td>
+                <div class="form-inline" style="margin-bottom:10px;">
+                    <span class="label label-default">Title:</span>
+                    <span>{{listing.title}}</span>
+                </div>
+                <div class="form-inline" style="margin-bottom:10px;">
+                    <span class="label label-success">Asin:</span>
+                    <span>{{listing.asin}}</span>
+                </div>
+                <div class="form-inline" style="margin-bottom:10px;">
+                    <span class="label label-warning">Delivery:</span>
+                    <span class="delivery">{{listing.delivery}}</span>
+                </div>
+                <div class="form-inline" style="margin-bottom:10px;">
+                    <a href="https://www.amazon.com/dp/{{listing.asin}}" target="_blank">
+                        <button class="btn btn-primary" type="button">
+                            <span>Amazon链接</span>
+                        </button>
+                    </a>
+
+                    <div class="form-group">
+                        <input name='1688' type="text" class="form-control" placeholder="1688货源">
+                        <button class="btn btn-default alibaba" name="{{listing.asin}}">Submit</button>
+                    </div>
+
+                </div>
+                <div class="form-inline"
+                    style="margin-bottom:10px;display:{% if listing.alibaba_link == '0' %}none{% endif %}">
+                    <a href="{{listing.alibaba_link}}" target="_blank">
+                        <button class="btn btn-danger" type="button">
+                            <span>货源链接</span>
+                        </button>
+                    </a>
+                    <span class='link'>{{listing.alibaba_link}}</span>
+                </div>
+
+            </td>
+            <!--                    review-->
+            <td style="width:100px; vertical-align:middle;">
+                <div class="form-inline" style="margin-bottom:20px;">
+                    <span>{{listing.review}}</span>
+                </div>
+            </td>
+            <!--                    seller-->
+            <td style="width:100px; vertical-align:middle;">
+                <div class="form-inline" style="margin-bottom:20px;">
+                    <span>{{listing.sellers}}</span>
+                </div>
+            </td>
+            <!--                    build_time-->
+            <td style="width:100px; vertical-align:middle;">
+                <div class="form-inline" style="
+                margin-bottom:20px;">
+                    <span>{{listing.build_time}}</span>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+
+    $.ajaxSetup({ data: { csrfmiddlewaretoken: '{{ csrf_token }}' } });
+    $($('.post').click(function () {
+        var url = '/collect/' + $(this).attr('name')
+        if ($(this).text().trim() == '取消收藏') {
+            var collection = '0'
+            confirm('确认取消收藏吗？')
+            if ($('#collected').attr('selected')) {
+                $(this).parent().parent().remove()
+                var count = $('#count').text()
+                var num = Number(count) - 1
+                $('#count').text(num)
+            } else {
+                $(this).hide()
+                $(this).prev().show()
+            }
+
+        } else {
+            var collection = '1'
+            $(this).hide()
+            $(this).next().show()
+        }
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: {
+                'collection': collection,
+            },
+            success: function () {
+                console.log(collection)
+            },
+        })
+    }))
+    $($('.alibaba').click(function () {
+        var url_1688 = '/alibaba/' + $(this).attr('name')
+        link = $(this).prev().val()
+        if(link == '0'){
+            $(this).parent().parent().next().hide()
+            $(this).parent().parent().next().find('a').attr('href',link)
+        }else{
+        $(this).parent().parent().next().find('a').attr('href',link)
+        $(this).parent().parent().next().find('span.link').text(link)
+        $(this).parent().parent().next().show()}
+        $.ajax({
+            type: 'POST',
+            url: url_1688,
+            data: {
+                '1688': link,
+                'url' :'index'
+            },
+            success: function () {
+                console.log(link)
+            },
+        })
+    }))
+    $($('.monitor').click(function () {
+        $(this).hide()
+        $(this).parent().next().find('button').show()
+        url = '/monitor/' + $(this).attr('name')
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: {
+                'monitor': '开始监测'
+            },
+            success: function () {
+                console.log('开始监测')
+            },
+        })
+          }))
+        $($('.cancel_monitor').click(function () {
+         $(this).hide()
+        $(this).parent().prev().find('button').show()
+        url = '/monitor/' + $(this).attr('name')
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: {
+                'monitor': '取消监测'
+            },
+            success: function () {
+                console.log('取消监测')
+            },
+        })
+    }))
+    $($('#delivery').change(function () {
+        if ($('#delivery').val() == 'FBA') {
+            console.log('FBA')
+            $('.delivery').parent().parent().parent().show()  /*初始化全部显示*/
+            var a = $('.delivery:not(:contains("FBA"))');
+            for (let i = 0; i < a.length; i++) {
+                $(a[i]).parent().parent().parent().hide()
+            }
+            var other = a.length
+            console.log(other + '不个包含FBA的个数')
+            var num1 = {{计数}}-other
+            console.log(num1)
+            $('#count').text(num1)
+        }
+        if ($('#delivery').val() == 'FBM') {
+            console.log('FBM')
+            $('.delivery').parent().parent().parent().show()  /*初始化全部显示*/
+            var a = $('.delivery:not(:contains("FBM"))');
+            for (let i = 0; i < a.length; i++) {
+                $(a[i]).parent().parent().parent().hide()
+            }
+            var other = a.length
+            console.log(other + '不个包含FBM的个数')
+            var num2 = {{计数}}-other
+            console.log(num2)
+            $('#count').text(num2)
+        }
+        if ($('#delivery').val() == 'Other') {
+            console.log('Other')
+            $('.delivery').parent().parent().parent().show()
+            var a = $('.delivery').contents()
+            var c = 0
+            for (let i = 0; i < a.length; i++) {
+                console.log(a[i])
+                var b = a[i].data
+                if (b.indexOf('FBA') == 0 || b.indexOf('FBM') == 0) {
+                    $($('.delivery')[i]).parent().parent().parent().hide()
+                    c += 1
+                }
+            }
+            var num3 = {{计数}}-c
+            console.log(num3)
+            $('#count').text(num3)
+        }
+        if ($('#delivery').val() == '全部') {
+            console.log('全部')
+            $('.delivery').parent().parent().parent().show()  /*初始化全部显示*/
+            var num4 = {{计数}}
+            console.log(num4)
+            $('#count').text(num4)
+        }
+    }))
+     $($('#readRows').click(function () {
+        url = '/readInfo/' + $(this).attr('name')
+        var read_rows = $(this).prev().val()
+         if(read_rows==0){
+             $(this).parent().children('button.read').text('还未开始查看')
+         }else{
+             $(this).parent().children('button.read').text('已看到第'+ read_rows +'条')
+         }
+         $.ajax({
+             type: 'POST',
+             url: url,
+             data: {
+                 'read_rows': read_rows
+     },
+         success: function () {
+             console.log('取消监测')
+         }
+     ,
+     })
+    }))
+
+</script>
+{% endblock 主体 %}

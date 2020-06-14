@@ -1,0 +1,32 @@
+#topNav{
+    font-size: 1.3em;
+    padding-left: 2em;
+    background-color: #313641!important;
+}
+td {
+    vertical-align: middle;
+}
+
+.icon {
+    display: inline-block;
+    width: 32px; height: 32px;
+    background-color: orange;
+    /*mask: url(../icons/star.png) no-repeat;*/
+    /*mask-size: 100% 100%;*/
+}
+.icon-star{
+    -webkit-mask: url(../icons/star.png) no-repeat;
+    -webkit-mask-size: 100% 100%;
+}
+.icon-airplane{
+    -webkit-mask: url(../icons/airplane.png) no-repeat;
+    -webkit-mask-size: 100% 100%;
+}
+.icon-house{
+    -webkit-mask: url(../icons/house.png) no-repeat;
+    -webkit-mask-size: 100% 100%;
+}
+.icon-time{
+    -webkit-mask: url(../icons/time.png) no-repeat;
+    -webkit-mask-size: 100% 100%;
+}

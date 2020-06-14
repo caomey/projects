@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+{% block 主体 %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/chart.css' %}">
+<script src="http://cdn.highcharts.com.cn/highcharts/highcharts.js"></script>
+<script>$('#amazonMonitor').addClass('active')</script> /*选中导航栏加深颜色*/
+<div id='nav_all' class="container-fluid" style="padding-top:80px;padding-bottom: 10px">
+    <div class="col-md-2">
+        <form class="form-inline" method="post" action="">{% csrf_token %}
+            <div class="form-group">
+                <span class="icon icon-time"></span>
+                <label>Date：</label>
+                <select name="time" class="form-control">
+                    <option>24小时</option>
+                    <option>48小时</option>
+                    <option>一周</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success">提交</button>
+        </form>
+    </div>
+    <div class="col-md-2">
+        <div class="form-inline">
+            <span class="icon icon-house"></span>
+            <label>Store：</label>
+            <select id='store' name="store" class="form-control">
+                <option>全部</option>
+                <option>FF</option>
+                <option>FY</option>
+            </select>
+            </div>
+    </div>
+    <div class="col-md-3 form-inline">
+        <input name='1688' type="text" class="form-control" placeholder="手动添加Asin">
+        <button id='addAsin' class="btn btn-default alibaba">Submit</button>
+    </div>
+</div>
+
+
+
+<!-- Table -->
+<table class="table table-responsive">
+    <caption>共查询出<span id='count'>{{计数}}</span>条商品结果</caption>
+    <thead>
+    <tr class="table-dark">
+        <th>#</th>
+        <th>image</th>
+        <th>Info</th>
+        <th>priceChart</th>
+        <th>rankChart</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for monitor in data %}
+    <tr>
+        <th scope="row" style="width:30px;">{{forloop.counter}}</th>
+        <td style="width:300px; vertical-align:middle;">
+            <a href="https://www.amazon.com/dp/{{monitor.asin}}" target="_blank">
+                <img src="{{monitor.img}}" lazy="loaded" style="width: 300px; height: 300px;">
+            </a>
+            <button class="btn btn-danger post" style="margin-top: 5px; float: left; margin-left: 16px; width: 80px;"
+                    name="{{ monitor.asin }}">
+                取消监测
+            </button>
+            <div class='link' {% if monitor.alibaba_link == '0' %}style="display: none"{% endif %}>
+                <a  href="{{monitor.alibaba_link}}" target="_blank">
+                    <button class="btn btn-primary" type="button"
+                            style="margin-top: 5px; float: left; margin-left: 16px; width: 80px;">
+                        <span>货源链接</span>
+                    </button>
+                </a>
+                <span class="link1688" style="margin-top: 35px">{{monitor.alibaba_link}}</span>
+            </div>
+        </td>
+        <td style="width: 300px; height: 300px;margin: auto;">
+            <h4>Asin : <span class="label label-default">{{monitor.asin}}</span></h4>
+            <h4>Rank : <span class="label label-success"># {{monitor.rank}}</span></h4>
+            <h4>Price : <span class="label label-info">$ {{monitor.price}}</span></h4>
+            <h4>BuyBox : <span class="label label-info seller">{{monitor.sellers}}</span></h4>
+            <h4>Brand : <span class="label label-info">{{monitor.brand}}</span></h4>
+            <h4>Registered : <span class="label label-danger">{{monitor.registered}}</span></h4>
+            <h4>图片是否变化 ： <span class="label label-warning">{{monitor.img_change}}</span></h4>
+            <h4>标题是否变化 ： <span class="label label-warning">{{monitor.title_change}}</span></h4>
+            <h4>品牌是否变化 ： <span class="label label-warning">{{monitor.brand_change}}</span></h4>
+            <div class="form-inline">
+                <input name='1688' type="text" class="form-control" placeholder="1688货源" style="width:170px">
+                <button class="btn btn-default alibaba" name="{{monitor.asin}}">Submit</button>
+            </div>
+        </td>
+        <td>
+            <div id='{{monitor.asin}}1' style="min-width: 310px; height: 320px; margin: 0 auto; width: 640px;"></div>
+        </td>
+        <td>
+            <div id='{{monitor.asin}}2' style="min-width: 310px; height: 320px; margin: 0 auto; width: 640px;"></div>
+        </td>
+        <script type="text/javascript">
+            Highcharts.chart('{{monitor.asin}}1', {
+                chart: {
+                    backgroundColor:'#bebec8',
+                    type: 'line'
+                },
+                title: {
+                    text: '{{monitor.asin}} 的价格折线图'
+                },
+                subtitle: {
+                    text: '{{monitor.asin}}'
+                },
+                xAxis: {
+                    categories: [
+                        {% for module in monitor.li_time %}
+                            "{{module}}",
+                        {% endfor %}
+                    ]
+                },
+                yAxis: {
+                    title: {
+                        text: '$ price'
+                    }
+                },
+                plotOptions: {
+                    line: {
+                        dataLabels: {
+                            enabled: true
+                        },
+                        enableMouseTracking: true
+                    }
+                },
+                series: [{
+                    name: 'buybox',
+                    data: {{monitor.p1}}
+                }, {
+                    name: '{{monitor.S1}}',
+                    data: {{monitor.P1}}
+                },
+            {
+                    name: '{{monitor.S2}}',
+                    data:  {{monitor.P2}}
+                }]
+            });
+        </script>
+        <script type="text/javascript">
+            Highcharts.chart('{{monitor.asin}}2', {
+                chart: {
+                    backgroundColor:'#d2d2dc',
+                    type: 'line'
+                },
+                title: {
+                    text: '{{monitor.asin}} 的排名折线图'
+                },
+                subtitle: {
+                    text: '{{monitor.asin}}'
+                },
+                xAxis: {
+                    categories: [
+                         {% for module in monitor.li_time %}
+                            "{{module}}",
+                        {% endfor %}
+                    ]
+                },
+                yAxis: {
+                    title: {
+                        text: '# Rank'
+                    }
+                },
+                plotOptions: {
+                    line: {
+                        dataLabels: {
+                            enabled: true
+                        },
+                        enableMouseTracking: true
+                    }
+                },
+                series: [{
+                    name: 'Rank',
+                    data: {{monitor.ranks}}
+                }]
+            });
+        </script>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<script>
+    $($('#store').change(function () {
+        if ($('#store').val() == 'FF') {
+            console.log('FF')
+            $('.seller').parent().parent().parent().show()
+            var a = $('.seller:not(:contains("fayfairy"))');
+            for (let i = 0; i < a.length; i++) {
+                $(a[i]).parent().parent().parent().hide()
+            }
+            var other = a.length
+             console.log(other + '不个包含ff的个数')
+            var num1 = {{计数}}-other
+            console.log(num1)
+            $('#count').text(num1)
+        }
+        if ($('#store').val() == 'FY') {
+            console.log('FY')
+            $('.seller').parent().parent().parent().show()
+            var b = $('.seller:not(:contains("FAYE MALL"))');
+            for (let i = 0; i < b.length; i++) {
+                $(b[i]).parent().parent().parent().hide()
+            }
+            var other = b.length
+            console.log(other + '个不包含fy的个数')
+            var num2 = {{计数}}-other
+            console.log(num2)
+             $('#count').text(num2)
+        }
+            if ($('#store').val() == '全部') {
+            console.log('全部')
+            $('.seller').parent().parent().parent().show()
+            var num3 = {{计数}}
+            console.log(num3)
+             $('#count').text(num3)
+        }
+    }))
+    $.ajaxSetup({ data: { csrfmiddlewaretoken: '{{ csrf_token }}' } });
+    $($('.post').click(function () {
+      var num4 = {{计数}}-1
+        console.log(num4)
+         $('#count').text(num4)
+        $(this).parent().parent().hide()
+        url = '/monitor/' + $(this).attr('name')
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: {
+                    'monitor':'取消监测'
+                },
+                success: function () {
+                    console.log('取消监测')
+                },
+            })
+        }))
+    $($('#addAsin').click(function () {
+        var asin = $('input[name="1688"]').val()
+        if(asin.length != 10 || asin.substring(0,2) != 'B0'){
+            alert('请输入正确的asin!')
+        }else{
+            url = '/monitor/' + asin
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: {
+                    'monitor': '开始监测',
+                    'action':'手动添加'
+                },
+                success: function () {
+                    console.log('开始监测')
+                   alert('添加成功')
+                },
+            })
+         $('input[name="1688"]').val('')
+        }
+        }))
+    $($('.alibaba').click(function () {
+        var url_1688 = '/alibaba/' + $(this).attr('name')
+        link = $(this).prev().val()
+        if(link == '0'){
+            $(this).parent().parent().prev().find('div.link').hide()
+        }else{
+        $(this).parent().parent().prev().find('div a').attr('href',link)
+        $(this).parent().parent().prev().find('div span.link1688').text(link)
+         $(this).parent().parent().prev().find('div.link').show()}
+        $.ajax({
+            type: 'POST',
+            url: url_1688,
+            data: {
+                '1688': link,
+                'url': 'chart'
+            },
+            success: function () {
+                console.log(link)
+            },
+        })
+    }))
+</script>
+
+{% endblock 主体 %}

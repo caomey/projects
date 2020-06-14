@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Login</title>
+    <link rel="icon" href="{% static 'icons/pychen.ico' %}" type="image/x-icon"/>
+    <link rel="stylesheet" href="{% static 'css/bootstrap3.3.7.css' %}">
+    <script src="{% static 'js/jquery3.4.1.js' %}"></script>
+    <script src="{% static 'js/bootstrap3.3.7.js' %}"></script>
+</head>
+<body style="background-color: #262640">
+<div style="padding: 16px">
+    <img src="{% static 'images\pychen1.png' %}" class="img-responsive" alt="Responsive image"
+         style="margin: auto; height: 80px">
+</div>
+ <div class="container-fluid" style="width: 400px;height:420px;background-color: #13142C;border-radius:10px;margin-top: 150px" >
+     <div>
+         <h1 class="text-center" style="color: white"><strong>Sign in to Pychen</strong></h1>
+         <h3 class="text-center" style="color: white"><strong>Welcome</strong></h3>
+     </div>
+     <form method="post" action="">
+         {% csrf_token %}
+         <div class="form-group">
+             <label class="la" style="color: white;font-size: xx-small;margin-left:10%">username</label>
+             <input name="username" type="username" class="form-control" id="exampleInputEmail1" placeholder="username"
+                    style="margin:auto; width:80%">
+         </div>
+         <div class="form-group">
+             <label class="la" style="color: white;font-size: xx-small;margin-left:10%">Password</label>
+             <input name="password" type="password" class="form-control" id="exampleInputPassword1"
+                    placeholder="password" style="margin:auto; width:80%">
+         </div>
+
+         <div class="text-center">
+             <span class="text-danger">{{msg}}</span>
+         </div>
+         <div style="text-align:center;">
+             <button type="submit" class="btn btn-primary" style="width:60%">Log in</button>
+         </div>
+<!--         <div style="margin-left: 60%;margin-top: 50px;">-->
+<!--            <h5 style="color: white">体验账号</h5>-->
+<!--            <h5 style="color: white">账号：****</h5>-->
+<!--            <h5 style="color: white">密码：****</h5>-->
+<!--        </div>-->
+     </form>
+ </div>
+</body>
+</html>
